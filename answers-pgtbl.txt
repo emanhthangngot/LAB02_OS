@@ -1,0 +1,40 @@
+=== Question 4.1.1 ===
+Which other xv6 system call(s) could be made faster using this shared page?
+
+- getppid(): Parent PID ít thay đổi, có thể lưu vào shared page
+- getuid()/getgid(): User/Group ID có thể được kernel cập nhật vào shared page
+- clock_gettime(): Thời gian hệ thống có thể được kernel cập nhật định kỳ
+
+Cách hoạt động: Kernel cập nhật giá trị vào struct usyscall, userspace đọc trực 
+tiếp từ USYSCALL address mà không cần trap vào kernel.
+
+=== Question 4.1.2 ===
+Leaf pages trong vmprint output của init process:
+
+Page 0 (va 0x0): text segment
+  - Chứa: code của program
+  - Permission: RXU (read, execute, user)
+
+Page 1 (va 0x1000): data segment  
+  - Chứa: initialized/uninitialized data
+  - Permission: RWU (read, write, user)
+
+Page 2 (va 0x2000): guard page
+  - Chứa: không có dữ liệu, dùng để detect stack overflow
+  - Permission: không accessible (chỉ có V bit hoặc không có permission)
+
+Page 3 (va 0x3000): user stack
+  - Chứa: stack của user process
+  - Permission: RWU (read, write, user)
+
+Page 509 (va USYSCALL): usyscall page
+  - Chứa: struct usyscall với PID
+  - Permission: RU (read, user - không có write)
+
+Page 510 (va TRAPFRAME): trapframe
+  - Chứa: saved registers khi trap
+  - Permission: RW (read, write - kernel only, không có U)
+
+Page 511 (va TRAMPOLINE): trampoline
+  - Chứa: code để switch giữa user/kernel mode
+  - Permission: RX (read, execute - kernel onlyPrel, không có U)
